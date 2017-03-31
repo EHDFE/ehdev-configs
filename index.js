@@ -1,0 +1,1 @@
+exports.standard = require('./src/standard');
