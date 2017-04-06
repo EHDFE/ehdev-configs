@@ -264,7 +264,7 @@ module.exports = (env = 'development', options) => {
       ]
     },
 
-    devtool: IS_DEV ? 'cheap-module-eval-source-map': 'source-map',
+    devtool: IS_DEV ? 'cheap-module-source-map': 'source-map',
 
     resolveLoader: {
       modules: [ MODULES_PATH ]
