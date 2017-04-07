@@ -7,6 +7,8 @@ const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plug
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 // const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
+const { getHTML } = require('./util');
+
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
 const PAGE_PATH = path.resolve(SOURCE_PATH, './pages');
@@ -42,25 +44,33 @@ module.exports = (env = 'development', options) => {
 
   // 页面级列表
   const pages = fs.readdirSync(PAGE_PATH);
-  
+
+
   let FinalPlugins = [];
   if (IS_DEV) {
     FinalPlugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
+
   // 构建输出map
+  const htmlsList = pages.map(page => ({
+    module: page,
+    htmls: getHTML(path.join(PAGE_PATH, page)).map(html => html.replace(/\.html?$/, '')),
+  }));
   const pageEntry = {};
-  pages.map(page => {
-    let entry = [
-      path.resolve(PAGE_PATH, `./${page}/index.js`),
-    ];
-    if (IS_DEV) {
-      entry.unshift(
-        `webpack-dev-server/client?http://localhost:${options.port}`,
-        'webpack/hot/dev-server'
-      );
-    }
-    pageEntry[`${page}/bundle`] = entry;
+  htmlsList.forEach(pageModule => {
+    pageModule.htmls.forEach(page => {
+      let entry = [
+        path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.js`),
+      ];
+      if (IS_DEV) {
+        entry.unshift(
+          `webpack-dev-server/client?http://localhost:${options.port}`,
+          'webpack/hot/dev-server'
+        );
+      }
+      pageEntry[`${pageModule.module}/bundle.${page}`] = entry;
+    });
   });
 
   const OutputConfig = {
@@ -81,12 +91,23 @@ module.exports = (env = 'development', options) => {
   });
 
   // 输出页面配置
-  const htmlPlugins = pages.map(page => new HtmlWebpackPlugin({
-    filename: `${page}/index.html`,
-    template: path.resolve(PAGE_PATH, `./${page}/index.html`),
-    chunksSortMode: 'auto',
-    chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${page}/bundle`),
-  }));
+  let htmlPlugins = [];
+  htmlsList.forEach(pageModule => {
+    htmlPlugins = htmlPlugins.concat(
+      pageModule.htmls.map(page => new HtmlWebpackPlugin({
+        filename: `${pageModule.module}/${page}.html`,
+        template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
+        chunksSortMode: 'auto',
+        chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${pageModule.module}/bundle.${page}`),
+      }))
+    );
+  });
+  // const htmlPlugins = pages.map(page => new HtmlWebpackPlugin({
+  //   filename: `${page}/index.html`,
+  //   template: path.resolve(PAGE_PATH, `./${page}/index.html`),
+  //   chunksSortMode: 'auto',
+  //   chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${page}/bundle`),
+  // }));
 
   // 公共模块配置
   const LibiaryChunks = LibiaryList.map(
@@ -133,6 +154,8 @@ module.exports = (env = 'development', options) => {
         loader: 'file-loader',
         options: {
           name: '[name].[ext]',
+          outputPath: 'assets/',
+          publicPath: '/assets/',
         },
       },
     ]
@@ -151,6 +174,8 @@ module.exports = (env = 'development', options) => {
         options: {
           limit: 10000,
           name: '[name].[hash:8].[ext]',
+          outputPath: 'assets/',
+          publicPath: `${PROJECT_CONFIG.publicPath}/assets/`,
         },
       },
       {
@@ -246,6 +271,7 @@ module.exports = (env = 'development', options) => {
               loader: 'html-loader',
               options: {
                 minimize: !IS_DEV,
+                removeComments: !IS_DEV,
                 interpolate: true,
                 root: './',
               },
