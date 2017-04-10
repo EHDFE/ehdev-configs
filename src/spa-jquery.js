@@ -4,15 +4,14 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
-// const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
 const { getHTML, getStyleWithImageLoaderConfig } = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
-const PAGE_PATH = path.resolve(SOURCE_PATH, './pages');
 const BUILD_PATH = path.resolve(WORK_DIR, './dist');
 const MODULES_PATH = path.resolve(__dirname, '../node_modules');
+const APP_PATH = path.join(SOURCE_PATH, './app');
 
 /**
  * 标准化项目输出配置
@@ -22,6 +21,9 @@ module.exports = (env = 'development', options) => {
 
   // 开发环境
   const IS_DEV = env === 'development';
+
+  // 应用输出页面
+  const AppPages = getHTML(APP_PATH);
 
   // 默认项目配置
   const DEFAULT_PROJECT_CONFIG = {
@@ -41,79 +43,34 @@ module.exports = (env = 'development', options) => {
   // refer to: https://github.com/ai/browserslist#queries
   const BROWSER_SUPPORTS = PROJECT_CONFIG.browser_support[env.toUpperCase()];
 
-  // 页面级列表
-  const pages = fs.readdirSync(PAGE_PATH);
-
-
-  let FinalPlugins = [];
+  // 入口配置
+  const entryConfig = {};
+  // 插件配置
+  let pluginsConfig = [];
   if (IS_DEV) {
-    FinalPlugins.push(new webpack.HotModuleReplacementPlugin());
+    pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
   }
 
-  // 构建输出map
-  const htmlsList = pages.map(page => ({
-    module: page,
-    htmls: getHTML(path.join(PAGE_PATH, page)).map(html => html.replace(/\.html?$/, '')),
-  }));
-  const pageEntry = {};
-  htmlsList.forEach(pageModule => {
-    pageModule.htmls.forEach(page => {
-      let entry = [
-        path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.js`),
-      ];
-      if (IS_DEV) {
-        entry.unshift(
-          `webpack-dev-server/client?http://localhost:${options.port}`,
-          'webpack/hot/dev-server'
-        );
-      }
-      pageEntry[`${pageModule.module}/bundle.${page}`] = entry;
-    });
-  });
-
-  const OutputConfig = {
-    path: BUILD_PATH,
-  };
-  if (!IS_DEV) {
-    // 生产环境 资源名加上 hash
-    Object.assign(OutputConfig, {
-      filename: '[name].[chunkhash:8].js',
-    });
-  }
-
-  // libiary 输出配置
-  const LibiaryList = Object.keys(PROJECT_CONFIG.libiary);
-  const LibiaryEntry = {};
-  LibiaryList.forEach(name => {
-    LibiaryEntry[`assets/${name}`] = PROJECT_CONFIG.libiary[name].map(file => path.resolve(SOURCE_PATH, file));
-  });
-
-  // 输出页面配置
-  let htmlPlugins = [];
-  htmlsList.forEach(pageModule => {
-    htmlPlugins = htmlPlugins.concat(
-      pageModule.htmls.map(page => new HtmlWebpackPlugin({
-        filename: `${pageModule.module}/${page}.html`,
-        template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
+  AppPages.forEach(appPage => {
+    const pageName = appPage.replace(/\.html?$/, '');
+    entryConfig[pageName] = [
+      path.join(SOURCE_PATH, `app/${pageName}.js`),
+    ];
+    if (IS_DEV) {
+      entryConfig[pageName].unshift(
+        `webpack-dev-server/client?http://localhost:${options.port}`,
+        'webpack/hot/dev-server'
+      );
+    }
+    pluginsConfig.push(
+      new HtmlWebpackPlugin({
+        filename: appPage,
+        template: path.join(APP_PATH, appPage),
         chunksSortMode: 'auto',
-        chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${pageModule.module}/bundle.${page}`),
-      }))
+        chunks: [ pageName ],
+      })
     );
   });
-  // const htmlPlugins = pages.map(page => new HtmlWebpackPlugin({
-  //   filename: `${page}/index.html`,
-  //   template: path.resolve(PAGE_PATH, `./${page}/index.html`),
-  //   chunksSortMode: 'auto',
-  //   chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${page}/bundle`),
-  // }));
-
-  // 公共模块配置
-  const LibiaryChunks = LibiaryList.map(
-    name => new webpack.optimize.CommonsChunkPlugin({
-      name: `assets/${name}`,
-      minChunks: Infinity,
-    })
-  );
 
   // css & image 解析配置
   const {
@@ -123,9 +80,9 @@ module.exports = (env = 'development', options) => {
   } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`);
 
   if (ExtractCssPlugin) {
-    FinalPlugins.push(ExtractCssPlugin);
+    pluginsConfig.push(ExtractCssPlugin);
   }
-  
+
   // 外部资源配置，这里配置后不通过构建
   const ExternalsConfig = {};
   const ExternalsCopyList = [];
@@ -139,35 +96,28 @@ module.exports = (env = 'development', options) => {
     ExternalsBuildList.push(path.join('assets', path.basename(EXTERNALS[name].path)));
   });
   // 复制 external 资源到输出目录
-  FinalPlugins.push(new CopyWebpackPlugin(ExternalsCopyList));
+  pluginsConfig.push(new CopyWebpackPlugin(ExternalsCopyList));
   // html 中 external 的资源需要手动加入
   const IncludeAssetsConfig = new HtmlWebpackIncludeAssetsPlugin({
     assets: ExternalsBuildList,
     append: false,
   });
 
-  FinalPlugins = FinalPlugins.concat(
-    htmlPlugins,
+  pluginsConfig = [
+    ...pluginsConfig,
     IncludeAssetsConfig,
-    LibiaryChunks,
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.DEBUG': JSON.stringify(process.env.DEBUG)
-    })
-  );
-  // if (!IS_DEV) {
-  //   FinalPlugins.push(
-  //     new ChunkManifestPlugin({
-  //       filename: 'manifest.json',
-  //       manifestVariable: 'webpackManifest'
-  //     })
-  //   );
-  // }
+    }),
+  ];
 
   return {
-    entry: Object.assign(pageEntry, LibiaryEntry),
+    entry: entryConfig,
 
-    output: OutputConfig,
+    output: {
+      path: BUILD_PATH,
+    },
 
     module: {
       rules: [
@@ -182,7 +132,8 @@ module.exports = (env = 'development', options) => {
                   browsers: BROWSER_SUPPORTS
                 }, 
               }]
-            ]
+            ],
+            plugins: [ path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import') ],
           }
         },
         StyleLoaderConfig,
@@ -200,11 +151,11 @@ module.exports = (env = 'development', options) => {
               },
             },
           ],
-        }
+        },
       ]
     },
 
-    externals: ExternalsConfig,
+    externals: {},
 
     resolve: {
       modules: [
@@ -219,7 +170,7 @@ module.exports = (env = 'development', options) => {
       modules: [ MODULES_PATH ],
     },
 
-    plugins: FinalPlugins,
+    plugins: pluginsConfig,
   };
 
 };
