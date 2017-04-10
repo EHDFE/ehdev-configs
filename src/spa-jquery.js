@@ -117,6 +117,7 @@ module.exports = (env = 'development', options) => {
 
     output: {
       path: BUILD_PATH,
+      pathinfo: IS_DEV,
     },
 
     module: {
