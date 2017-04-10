@@ -1,6 +1,11 @@
 # HISOTORY
 ---
 
+### 1.0.3
+---
+- `feat` support change build_path.
+
+
 ### 1.0.1
 ---
 - `feat` support multiple htmls in one page.
