@@ -9,7 +9,6 @@ const { getHTML, getStyleWithImageLoaderConfig } = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
-const BUILD_PATH = path.resolve(WORK_DIR, './dist');
 const MODULES_PATH = path.resolve(__dirname, '../node_modules');
 const APP_PATH = path.join(SOURCE_PATH, './app');
 
@@ -33,6 +32,7 @@ module.exports = (env = 'development', options) => {
       DEVELOPMENT: [ 'last 2 versions' ],
       PRODUCTION: [ 'last 2 versions' ]
     },
+    build_path: './dist',
   };
   const PROJECT_CONFIG = Object.assign(
     DEFAULT_PROJECT_CONFIG,
@@ -42,6 +42,7 @@ module.exports = (env = 'development', options) => {
 
   // refer to: https://github.com/ai/browserslist#queries
   const BROWSER_SUPPORTS = PROJECT_CONFIG.browser_support[env.toUpperCase()];
+  const BUILD_PATH = path.resolve(WORK_DIR, PROJECT_CONFIG.build_path);
 
   // 入口配置
   const entryConfig = {};
@@ -49,6 +50,17 @@ module.exports = (env = 'development', options) => {
   let pluginsConfig = [];
   if (IS_DEV) {
     pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
+  }
+
+  const OutputConfig = {
+    path: BUILD_PATH,
+    pathinfo: IS_DEV,
+  };
+  if (!IS_DEV) {
+    // 生产环境 资源名加上 hash
+    Object.assign(OutputConfig, {
+      filename: '[name].[chunkhash:8].js',
+    });
   }
 
   // libiary 输出配置
@@ -139,10 +151,7 @@ module.exports = (env = 'development', options) => {
   return {
     entry: entryConfig,
 
-    output: {
-      path: BUILD_PATH,
-      pathinfo: IS_DEV,
-    },
+    output: OutputConfig,
 
     module: {
       rules: [
