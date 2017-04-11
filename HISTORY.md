@@ -1,6 +1,11 @@
 # HISOTORY
 ---
 
+### 1.0.4
+---
+- `feat` new config: spa-jquery.
+
+
 ### 1.0.3
 ---
 - `feat` support change build_path.
