@@ -51,6 +51,13 @@ module.exports = (env = 'development', options) => {
     pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
   }
 
+  // libiary 输出配置
+  const LibiaryList = Object.keys(PROJECT_CONFIG.libiary);
+  const LibiaryEntry = {};
+  LibiaryList.forEach(name => {
+    LibiaryEntry[`assets/${name}`] = PROJECT_CONFIG.libiary[name].map(file => path.resolve(SOURCE_PATH, file));
+  });
+
   AppPages.forEach(appPage => {
     const pageName = appPage.replace(/\.html?$/, '');
     entryConfig[pageName] = [
@@ -67,9 +74,24 @@ module.exports = (env = 'development', options) => {
         filename: appPage,
         template: path.join(APP_PATH, appPage),
         chunksSortMode: 'auto',
-        chunks: [ pageName ],
+        chunks: [
+          LibiaryList.map(name => `assets/${name}`),
+          pageName,
+        ],
       })
     );
+  });
+
+  // 公共模块配置
+  const LibiaryChunks = LibiaryList.map(
+    name => new webpack.optimize.CommonsChunkPlugin({
+      name: `assets/${name}`,
+      minChunks: Infinity,
+    })
+  );
+
+  const CommonChunk = new webpack.optimize.CommonsChunkPlugin({
+    name: 'common',
   });
 
   // css & image 解析配置
@@ -106,6 +128,8 @@ module.exports = (env = 'development', options) => {
   pluginsConfig = [
     ...pluginsConfig,
     IncludeAssetsConfig,
+    ...LibiaryChunks,
+    // CommonChunk,
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.DEBUG': JSON.stringify(process.env.DEBUG)
