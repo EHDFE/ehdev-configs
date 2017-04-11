@@ -11,7 +11,6 @@ const { getHTML, getStyleWithImageLoaderConfig } = require('./util');
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
 const PAGE_PATH = path.resolve(SOURCE_PATH, './pages');
-const BUILD_PATH = path.resolve(WORK_DIR, './dist');
 const MODULES_PATH = path.resolve(__dirname, '../node_modules');
 
 /**
@@ -31,6 +30,7 @@ module.exports = (env = 'development', options) => {
       DEVELOPMENT: [ 'last 2 versions' ],
       PRODUCTION: [ 'last 2 versions' ]
     },
+    build_path: './dist',
   };
   const PROJECT_CONFIG = Object.assign(
     DEFAULT_PROJECT_CONFIG,
@@ -40,7 +40,8 @@ module.exports = (env = 'development', options) => {
 
   // refer to: https://github.com/ai/browserslist#queries
   const BROWSER_SUPPORTS = PROJECT_CONFIG.browser_support[env.toUpperCase()];
-
+  const BUILD_PATH = path.resolve(WORK_DIR, PROJECT_CONFIG.build_path);
+  
   // 页面级列表
   const pages = fs.readdirSync(PAGE_PATH);
 
