@@ -6,6 +6,23 @@ exports.getHTML = (cwd) => glob.sync('*.html', {
 });
 
 /**
+ * 其它文件处理
+ */
+exports.getOtherFileLoaderConfig = () => {
+  return {
+    test: /\.(swf|xlsx?|txt|docx?|pptx?)$/,
+    use: {
+      loader: 'file-loader',
+      options: {
+        name: '[name].[ext]',
+        outputPath: 'assets/',
+        publicPath: '/assets/',
+      },
+    },
+  }
+};
+
+/**
  * 样式和图片配置
  * 开发环境：使用 style loader 注入页面
  * 生产环境：使用 ExtractTextPlugin 抽成独立 css 文件

@@ -98,6 +98,18 @@ module.exports = (env = 'development', options) => {
         template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
         chunksSortMode: 'auto',
         chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${pageModule.module}/bundle.${page}`),
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: false,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        },
       }))
     );
   });
@@ -194,8 +206,6 @@ module.exports = (env = 'development', options) => {
             {
               loader: 'html-loader',
               options: {
-                minimize: !IS_DEV,
-                removeComments: !IS_DEV,
                 interpolate: true,
                 root: './',
               },

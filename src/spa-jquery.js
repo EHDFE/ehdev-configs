@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 
-const { getHTML, getStyleWithImageLoaderConfig } = require('./util');
+const { getHTML, getStyleWithImageLoaderConfig, getOtherFileLoaderConfig } = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
@@ -47,7 +47,9 @@ module.exports = (env = 'development', options) => {
   // 入口配置
   const entryConfig = {};
   // 插件配置
-  let pluginsConfig = [];
+  let pluginsConfig = [
+    new webpack.optimize.MinChunkSizePlugin({ minChunkSize: 50000 }),
+  ];
   if (IS_DEV) {
     pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
   }
@@ -90,6 +92,18 @@ module.exports = (env = 'development', options) => {
           LibiaryList.map(name => `assets/${name}`),
           pageName,
         ],
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: false,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        },
       })
     );
   });
@@ -158,17 +172,27 @@ module.exports = (env = 'development', options) => {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          loader: 'babel-loader',
-          query: {
-            presets: [
-              [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
-                targets: {
-                  browsers: BROWSER_SUPPORTS
-                }, 
-              }]
-            ],
-            plugins: [ path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import') ],
-          }
+          use: [
+            {
+              loader: 'babel-loader',
+              query: {
+                presets: [
+                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
+                    targets: {
+                      browsers: BROWSER_SUPPORTS
+                    },
+                    // 支持老IE，启用 loose 模式
+                    loose: true,
+                  }]
+                ],
+                plugins: [
+                  // path.resolve(MODULES_PATH, 'babel-plugin-transform-es3-member-expression-literals'),
+                  // path.resolve(MODULES_PATH, 'babel-plugin-transform-es3-property-literals'),
+                  path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
+                ],
+              },
+            },           
+          ],
         },
         StyleLoaderConfig,
         ImageLoaderConfig,
@@ -178,14 +202,13 @@ module.exports = (env = 'development', options) => {
             {
               loader: 'html-loader',
               options: {
-                minimize: !IS_DEV,
-                removeComments: !IS_DEV,
                 interpolate: true,
                 root: './',
               },
             },
           ],
         },
+        getOtherFileLoaderConfig(),
       ]
     },
 
