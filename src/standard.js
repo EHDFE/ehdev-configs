@@ -3,6 +3,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 // const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
@@ -31,6 +32,10 @@ module.exports = (env = 'development', options) => {
       PRODUCTION: [ 'last 2 versions' ]
     },
     build_path: './dist',
+    base64: {
+      enable: true,
+      limit: 10000
+    }
   };
   const PROJECT_CONFIG = Object.assign(
     DEFAULT_PROJECT_CONFIG,
@@ -49,6 +54,8 @@ module.exports = (env = 'development', options) => {
   let FinalPlugins = [];
   if (IS_DEV) {
     FinalPlugins.push(new webpack.HotModuleReplacementPlugin());
+  } else {
+    FinalPlugins.push(new WebpackChunkHash());
   }
 
   // 构建输出map
@@ -133,7 +140,7 @@ module.exports = (env = 'development', options) => {
     StyleLoaderConfig,
     ImageLoaderConfig,
     ExtractCssPlugin,
-  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`);
+  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`, PROJECT_CONFIG.base64);
 
   if (ExtractCssPlugin) {
     FinalPlugins.push(ExtractCssPlugin);

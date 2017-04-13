@@ -3,6 +3,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 
 const { getHTML, getStyleWithImageLoaderConfig, getOtherFileLoaderConfig } = require('./util');
@@ -33,6 +34,10 @@ module.exports = (env = 'development', options) => {
       PRODUCTION: [ 'last 2 versions' ]
     },
     build_path: './dist',
+    base64: {
+      enable: true,
+      limit: 10000
+    }
   };
   const PROJECT_CONFIG = Object.assign(
     DEFAULT_PROJECT_CONFIG,
@@ -52,6 +57,8 @@ module.exports = (env = 'development', options) => {
   ];
   if (IS_DEV) {
     pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
+  } else {
+    pluginsConfig.push(new WebpackChunkHash());
   }
 
   const OutputConfig = {
@@ -125,7 +132,7 @@ module.exports = (env = 'development', options) => {
     StyleLoaderConfig,
     ImageLoaderConfig,
     ExtractCssPlugin,
-  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`);
+  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`, PROJECT_CONFIG.base64);
 
   if (ExtractCssPlugin) {
     pluginsConfig.push(ExtractCssPlugin);

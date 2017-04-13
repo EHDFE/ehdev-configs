@@ -27,7 +27,7 @@ exports.getOtherFileLoaderConfig = () => {
  * 开发环境：使用 style loader 注入页面
  * 生产环境：使用 ExtractTextPlugin 抽成独立 css 文件
  */
-exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH) => {
+exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, base64Config) => {
   const CommonStyleLoader = [
     {
       loader: 'css-loader',
@@ -77,15 +77,20 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH) 
       filename: '[name].[contenthash:8].css',
     });
     // 生产环境 图片需要优化
+    const c = {
+      name: '[name].[hash:8].[ext]',
+      outputPath: 'assets/',
+      publicPath: '/assets/',
+    };
+    if (base64Config.enable) {
+      Object.assign(c, {
+        limit: base64Config.limit,
+      });
+    }
     ImageLoaderConfig = [
       {
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: '[name].[hash:8].[ext]',
-          outputPath: 'assets/',
-          publicPath: PUBLIC_PATH,
-        },
+        loader: base64Config.enable ? 'url-loader' : 'file-loader',
+        options: c,
       },
       {
         loader: 'image-webpack-loader',
