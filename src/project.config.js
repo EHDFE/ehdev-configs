@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   libiary: {},
     externals: {},
     browser_support: {
@@ -11,4 +11,4 @@ export default {
       limit: 10000
     },
     supportIE8: false,
-}
+};
