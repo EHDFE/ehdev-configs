@@ -14,6 +14,8 @@ const SOURCE_PATH = path.resolve(WORK_DIR, './src');
 const PAGE_PATH = path.resolve(SOURCE_PATH, './pages');
 const MODULES_PATH = path.resolve(__dirname, '../node_modules');
 
+const DEFAULT_PROJECT_CONFIG = require('./project.config');
+
 /**
  * 标准化项目输出配置
  * @{param} env: 'development' or 'production' 指定开发环境或生产环境
@@ -23,20 +25,6 @@ module.exports = (env = 'development', options) => {
   // 开发环境
   const IS_DEV = env === 'development';
 
-  // 默认项目配置
-  const DEFAULT_PROJECT_CONFIG = {
-    libiary: {},
-    externals: {},
-    browser_support: {
-      DEVELOPMENT: [ 'last 2 versions' ],
-      PRODUCTION: [ 'last 2 versions' ]
-    },
-    build_path: './dist',
-    base64: {
-      enable: true,
-      limit: 10000
-    }
-  };
   const PROJECT_CONFIG = Object.assign(
     DEFAULT_PROJECT_CONFIG,
     require(path.resolve(WORK_DIR, './abc.json'))
