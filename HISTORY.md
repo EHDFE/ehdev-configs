@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.5
+---
+- `feat` add config *base64* *supportIE8*
+
 ### 1.0.4
 ---
 - `feat` new config: spa-jquery.
