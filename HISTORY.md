@@ -1,6 +1,11 @@
 # HISOTORY
 ---
 
+### 1.0.7
+---
+- `feat` support file type: ico & cur.
+
+
 ### 1.0.5
 ---
 - `feat` add config *base64* *supportIE8*
