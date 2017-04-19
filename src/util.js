@@ -10,7 +10,7 @@ exports.getHTML = (cwd) => glob.sync('*.html', {
  */
 exports.getOtherFileLoaderConfig = () => {
   return {
-    test: /\.(swf|xlsx?|txt|docx?|pptx?)$/,
+    test: /\.(swf|xlsx?|txt|docx?|pptx?|ico|cur)$/,
     use: {
       loader: 'file-loader',
       options: {

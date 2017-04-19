@@ -216,6 +216,8 @@ module.exports = (env = 'development', options) => {
       ]
     },
 
+    target: 'web',
+
     devtool: IS_DEV ? 'cheap-module-source-map': 'source-map',
 
     resolveLoader: {
