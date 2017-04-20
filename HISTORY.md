@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.8
+---
+- `fix` assets path error in some case.
+
 ### 1.0.7
 ---
 - `feat` support file type: ico & cur.

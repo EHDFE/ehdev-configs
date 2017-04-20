@@ -108,12 +108,6 @@ module.exports = (env = 'development', options) => {
       }))
     );
   });
-  // const htmlPlugins = pages.map(page => new HtmlWebpackPlugin({
-  //   filename: `${page}/index.html`,
-  //   template: path.resolve(PAGE_PATH, `./${page}/index.html`),
-  //   chunksSortMode: 'auto',
-  //   chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${page}/bundle`),
-  // }));
 
   // 公共模块配置
   const LibiaryChunks = LibiaryList.map(
@@ -128,7 +122,7 @@ module.exports = (env = 'development', options) => {
     StyleLoaderConfig,
     ImageLoaderConfig,
     ExtractCssPlugin,
-  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}/assets/`, PROJECT_CONFIG.base64);
+  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}assets/`, PROJECT_CONFIG.base64);
 
   if (ExtractCssPlugin) {
     FinalPlugins.push(ExtractCssPlugin);

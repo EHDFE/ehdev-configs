@@ -10,5 +10,6 @@ module.exports = {
       enable: true,
       limit: 10000
     },
-    supportIE8: false,
+    publicPath: "../",
+    supportIE8: false
 };

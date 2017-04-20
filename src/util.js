@@ -64,7 +64,7 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
         options: {
           name: '[name].[ext]',
           outputPath: 'assets/',
-          publicPath: '/assets/',
+          publicPath: '../assets/',
         },
       },
     ];
@@ -80,7 +80,7 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
     const c = {
       name: '[name].[hash:8].[ext]',
       outputPath: 'assets/',
-      publicPath: '/assets/',
+      publicPath: PUBLIC_PATH,
     };
     if (base64Config.enable) {
       Object.assign(c, {
