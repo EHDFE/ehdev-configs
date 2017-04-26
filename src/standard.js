@@ -55,7 +55,7 @@ module.exports = (env = 'development', options) => {
   htmlsList.forEach(pageModule => {
     pageModule.htmls.forEach(page => {
       let entry = [
-        path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.js`),
+        path.resolve(PAGE_PATH, `./${pageModule.module}/js/${page}.js`),
       ];
       if (IS_DEV) {
         entry.unshift(
