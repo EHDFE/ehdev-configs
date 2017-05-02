@@ -133,12 +133,16 @@ module.exports = (env = 'development', options) => {
   const ExternalsCopyList = [];
   const ExternalsBuildList = [];
   Object.keys(EXTERNALS).forEach(name => {
-    ExternalsConfig[name] = EXTERNALS[name].alias;
-    ExternalsCopyList.push({
-      from: path.join(WORK_DIR, EXTERNALS[name].path),
-      to: path.join(BUILD_PATH, 'assets'),
-    });
-    ExternalsBuildList.push(path.join('assets', path.basename(EXTERNALS[name].path)));
+    if (EXTERNALS[name].alias) {
+      ExternalsConfig[name] = EXTERNALS[name].alias;
+    }
+    if (EXTERNALS[name].path) {
+      ExternalsCopyList.push({
+        from: path.join(WORK_DIR, EXTERNALS[name].path),
+        to: path.join(BUILD_PATH, 'assets'),
+      });
+      ExternalsBuildList.push(path.join('assets', path.basename(EXTERNALS[name].path)));
+    }
   });
   // 复制 external 资源到输出目录
   FinalPlugins.push(new CopyWebpackPlugin(ExternalsCopyList));
