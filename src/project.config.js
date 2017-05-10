@@ -11,5 +11,6 @@ module.exports = {
       limit: 10000
     },
     publicPath: "../",
-    supportIE8: false
+    supportIE8: false,
+    htmlAssetsInject: true,
 };

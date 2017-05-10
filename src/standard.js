@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
+const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const WebpackChunkHash = require('webpack-chunk-hash');
@@ -54,9 +55,11 @@ module.exports = (env = 'development', options) => {
   const pageEntry = {};
   htmlsList.forEach(pageModule => {
     pageModule.htmls.forEach(page => {
-      let entry = [
-        path.resolve(PAGE_PATH, `./${pageModule.module}/js/${page}.js`),
-      ];
+      const matchs = glob.sync(`${pageModule.module}/**/${page}.js`, {
+        cwd: PAGE_PATH,
+        absolute: true,
+      });
+      let entry = matchs.slice(0, 1);
       if (IS_DEV) {
         entry.unshift(
           `webpack-dev-server/client?http://localhost:${options.port}`,
@@ -91,6 +94,7 @@ module.exports = (env = 'development', options) => {
       pageModule.htmls.map(page => new HtmlWebpackPlugin({
         filename: `${pageModule.module}/${page}.html`,
         template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
+        inject: PROJECT_CONFIG.htmlAssetsInject,
         chunksSortMode: 'auto',
         chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${pageModule.module}/bundle.${page}`),
         minify: {

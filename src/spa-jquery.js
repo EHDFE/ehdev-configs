@@ -82,6 +82,7 @@ module.exports = (env = 'development', options) => {
       new HtmlWebpackPlugin({
         filename: appPage,
         template: path.join(APP_PATH, appPage),
+        inject: PROJECT_CONFIG.htmlAssetsInject,
         chunksSortMode: 'auto',
         chunks: [
           LibiaryList.map(name => `assets/${name}`),
@@ -180,9 +181,12 @@ module.exports = (env = 'development', options) => {
                     targets: {
                       browsers: BROWSER_SUPPORTS
                     },
+                    module: false,
                     // 支持老IE，启用 loose 模式
-                    loose: true,
-                  }]
+                    // loose: true,
+                  }],
+                  path.resolve(MODULES_PATH, 'babel-preset-react'),
+                  path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
                 ],
                 plugins: [
                   // path.resolve(MODULES_PATH, 'babel-plugin-transform-es3-member-expression-literals'),
