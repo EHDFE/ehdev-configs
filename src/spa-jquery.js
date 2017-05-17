@@ -44,9 +44,15 @@ module.exports = (env = 'development', options) => {
     new webpack.optimize.MinChunkSizePlugin({ minChunkSize: 50000 }),
   ];
   if (IS_DEV) {
-    pluginsConfig.push(new webpack.HotModuleReplacementPlugin());
+    pluginsConfig.push(
+      new webpack.NamedModulesPlugin(),
+      new webpack.HotModuleReplacementPlugin()
+    );
   } else {
-    pluginsConfig.push(new WebpackChunkHash());
+    pluginsConfig.push(
+      new webpack.HashedModuleIdsPlugin(),
+      new WebpackChunkHash()
+    );
   }
 
   const OutputConfig = {

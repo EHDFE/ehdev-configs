@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.12
+---
+- `fix` chunkhash does not change is some case.
+
 ### 1.0.8
 ---
 - `fix` assets path error in some case.

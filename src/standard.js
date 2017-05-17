@@ -42,9 +42,15 @@ module.exports = (env = 'development', options) => {
 
   let FinalPlugins = [];
   if (IS_DEV) {
-    FinalPlugins.push(new webpack.HotModuleReplacementPlugin());
+    FinalPlugins.push(
+      new webpack.NamedModulesPlugin(),
+      new webpack.HotModuleReplacementPlugin()
+    );
   } else {
-    FinalPlugins.push(new WebpackChunkHash());
+    FinalPlugins.push(
+      new webpack.HashedModuleIdsPlugin(),
+      new WebpackChunkHash()
+    );
   }
 
   // 构建输出map
