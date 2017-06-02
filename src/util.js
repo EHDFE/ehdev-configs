@@ -64,7 +64,7 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
         options: {
           name: '[name].[ext]',
           outputPath: 'assets/',
-          publicPath: '../assets/',
+          publicPath: PUBLIC_PATH,
         },
       },
     ];

@@ -1,6 +1,11 @@
 # HISOTORY
 ---
 
+### 1.0.13
+---
+- `fix` publicPath issue
+- `feat` update dep
+
 ### 1.0.12
 ---
 - `fix` chunkhash does not change is some case.
