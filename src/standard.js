@@ -163,6 +163,7 @@ module.exports = (env = 'development', options) => {
   });
 
   FinalPlugins = FinalPlugins.concat(
+    new webpack.optimize.ModuleConcatenationPlugin(),
     htmlPlugins,
     IncludeAssetsConfig,
     LibiaryChunks,
@@ -197,8 +198,15 @@ module.exports = (env = 'development', options) => {
                 targets: {
                   browsers: BROWSER_SUPPORTS
                 }, 
-              }]
-            ]
+                module: false,
+              }],
+              path.resolve(MODULES_PATH, 'babel-preset-react'),
+              path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
+            ],
+            plugins: [
+              path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
+            ],
+            
           }
         },
         StyleLoaderConfig,

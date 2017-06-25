@@ -1,6 +1,12 @@
 # HISOTORY
 ---
 
+### 1.0.14
+---
+- `upgrade` to webpack 3.0
+- `feat` support react in standard project   
+
+
 ### 1.0.13
 ---
 - `fix` publicPath issue
