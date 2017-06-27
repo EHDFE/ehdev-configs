@@ -93,6 +93,7 @@ module.exports = (env = 'development', options) => {
         chunksSortMode: 'auto',
         chunks: [
           LibiaryList.map(name => `assets/${name}`),
+          'assets/commonLibs',
           pageName,
         ],
         minify: {
@@ -115,13 +116,16 @@ module.exports = (env = 'development', options) => {
   const LibiaryChunks = LibiaryList.map(
     name => new webpack.optimize.CommonsChunkPlugin({
       name: `assets/${name}`,
+      chunks: [`assets/${name}`],
       minChunks: Infinity,
     })
   );
-
-  const CommonChunk = new webpack.optimize.CommonsChunkPlugin({
-    name: 'common',
-  });
+  LibiaryChunks.push(
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'assets/commonLibs',
+      chunks: Object.keys(entryConfig),
+    })
+  );
 
   // css & image 解析配置
   const {
@@ -162,7 +166,6 @@ module.exports = (env = 'development', options) => {
     ...pluginsConfig,
     IncludeAssetsConfig,
     ...LibiaryChunks,
-    // CommonChunk,
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.DEBUG': JSON.stringify(process.env.DEBUG)
@@ -170,7 +173,7 @@ module.exports = (env = 'development', options) => {
   ];
 
   return {
-    entry: entryConfig,
+    entry: Object.assign(entryConfig, LibiaryEntry),
 
     output: OutputConfig,
 

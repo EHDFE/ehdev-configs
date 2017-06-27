@@ -89,6 +89,7 @@ module.exports = (env = 'development', options) => {
   // libiary 输出配置
   const LibiaryList = Object.keys(PROJECT_CONFIG.libiary);
   const LibiaryEntry = {};
+  // 不配置 libiary，自动提取 common
   LibiaryList.forEach(name => {
     LibiaryEntry[`assets/${name}`] = PROJECT_CONFIG.libiary[name].map(file => path.resolve(SOURCE_PATH, file));
   });
@@ -102,7 +103,7 @@ module.exports = (env = 'development', options) => {
         template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
         inject: PROJECT_CONFIG.htmlAssetsInject,
         chunksSortMode: 'auto',
-        chunks: [].concat(LibiaryList.map(name => `assets/${name}`), `${pageModule.module}/bundle.${page}`),
+        chunks: [].concat(LibiaryList.map(name => `assets/${name}`), 'assets/commonLibs', `${pageModule.module}/bundle.${page}`),
         minify: {
           removeComments: true,
           collapseWhitespace: true,
@@ -123,7 +124,14 @@ module.exports = (env = 'development', options) => {
   const LibiaryChunks = LibiaryList.map(
     name => new webpack.optimize.CommonsChunkPlugin({
       name: `assets/${name}`,
+      chunks: [`assets/${name}`],
       minChunks: Infinity,
+    })
+  );
+  LibiaryChunks.push(
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'assets/commonLibs',
+      chunks: Object.keys(pageEntry),
     })
   );
 
