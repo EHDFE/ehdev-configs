@@ -41,6 +41,7 @@ module.exports = (env = 'development', options) => {
   const entryConfig = {};
   // 插件配置
   let pluginsConfig = [
+    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.optimize.MinChunkSizePlugin({ minChunkSize: 50000 }),
   ];
   if (IS_DEV) {
@@ -188,15 +189,11 @@ module.exports = (env = 'development', options) => {
                       browsers: BROWSER_SUPPORTS
                     },
                     module: false,
-                    // 支持老IE，启用 loose 模式
-                    // loose: true,
                   }],
                   path.resolve(MODULES_PATH, 'babel-preset-react'),
                   path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
                 ],
                 plugins: [
-                  // path.resolve(MODULES_PATH, 'babel-plugin-transform-es3-member-expression-literals'),
-                  // path.resolve(MODULES_PATH, 'babel-plugin-transform-es3-property-literals'),
                   path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
                 ],
               },

@@ -1,6 +1,6 @@
 {
   "name": "ehdev-configs",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "dependencies": {
     "autoprefixer": "^7.1.1",
     "babel-core": "^6.24.0",
-    "babel-loader": "^6.4.1",
+    "babel-loader": "^7.1.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-preset-env": "^1.3.2",
     "babel-preset-react": "^6.24.1",
@@ -42,7 +42,7 @@
     "postcss-loader": "^2.0.5",
     "style-loader": "^0.18.1",
     "url-loader": "^0.5.8",
-    "webpack": "^2.3.2",
+    "webpack": "^3.0.0",
     "webpack-chunk-hash": "^0.4.0",
     "webpack-dev-server": "^2.4.2"
   }
