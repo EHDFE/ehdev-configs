@@ -80,10 +80,18 @@ module.exports = (env = 'development', options) => {
       path.join(SOURCE_PATH, `app/${pageName}.js`),
     ];
     if (IS_DEV) {
-      entryConfig[pageName].unshift(
-        `webpack-dev-server/client?http://localhost:${options.port}`,
-        'webpack/hot/dev-server'
-      );
+      if (PROJECT_CONFIG.enableReactHotLoader) {
+        entryConfig[pageName].unshift(
+          'react-hot-loader/patch',
+          `webpack-dev-server/client?http://localhost:${options.port}`,
+          'webpack/hot/dev-server'
+        );
+      } else {
+        entryConfig[pageName].unshift(
+          `webpack-dev-server/client?http://localhost:${options.port}`,
+          'webpack/hot/dev-server'
+        );
+      }
     }
     pluginsConfig.push(
       new HtmlWebpackPlugin({
@@ -196,8 +204,11 @@ module.exports = (env = 'development', options) => {
                   path.resolve(MODULES_PATH, 'babel-preset-react'),
                   path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
                 ],
-                plugins: [
+                plugins: PROJECT_CONFIG.enableReactHotLoader ? [
+                  'react-hot-loader/babel',
                   path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
+                ] : [
+                  path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import')
                 ],
               },
             },           

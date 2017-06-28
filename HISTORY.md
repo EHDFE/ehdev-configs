@@ -1,6 +1,11 @@
 # HISOTORY
 ---
 
+### 1.0.16
+---
+- `feat`: support 'enableReactHotLoader'
+
+
 ### 1.0.14
 ---
 - `upgrade` to webpack 3.0
