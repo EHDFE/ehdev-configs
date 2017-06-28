@@ -188,12 +188,12 @@ module.exports = (env = 'development', options) => {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.jsx?$/,
           exclude: /node_modules/,
           use: [
             {
               loader: 'babel-loader',
-              query: {
+              options: {
                 presets: [
                   [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
                     targets: {
@@ -212,6 +212,34 @@ module.exports = (env = 'development', options) => {
                 ],
               },
             },           
+          ],
+        },
+        {
+          test: /\.svg$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: [
+                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
+                    targets: {
+                      browsers: BROWSER_SUPPORTS
+                    },
+                    module: false,
+                  }],
+                  path.resolve(MODULES_PATH, 'babel-preset-react'),
+                ],
+              },
+            },
+            {
+              loader: 'react-svg-loader',
+              options: {
+                svgo: {
+                  floatPrecision: 2,
+                },
+              },
+            },
           ],
         },
         StyleLoaderConfig,

@@ -116,7 +116,7 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
       use: StyleLoaderConfig,
     },
     ImageLoaderConfig: {
-      test: /\.(png|jpe?g|gif|svg)$/,
+      test: /\.(png|jpe?g|gif)$/,
       use: ImageLoaderConfig,
     },
     ExtractCssPlugin,
