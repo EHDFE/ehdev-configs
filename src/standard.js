@@ -205,7 +205,7 @@ module.exports = (env = 'development', options) => {
     module: {
       rules: [
         {
-          test: /\.jsx$/,
+          test: /\.jsx?$/,
           exclude: /node_modules/,
           loader: 'babel-loader',
           query: {
