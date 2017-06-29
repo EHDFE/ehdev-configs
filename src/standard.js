@@ -68,13 +68,13 @@ module.exports = (env = 'development', options) => {
       let entry = matchs.slice(0, 1);
       if (IS_DEV) {
         if (PROJECT_CONFIG.enableReactHotLoader) {
-          entryConfig[pageName].unshift(
+          entry.unshift(
             'react-hot-loader/patch',
             `webpack-dev-server/client?http://localhost:${options.port}`,
             'webpack/hot/dev-server'
           );
         } else {
-          entryConfig[pageName].unshift(
+          entry.unshift(
             `webpack-dev-server/client?http://localhost:${options.port}`,
             'webpack/hot/dev-server'
           );
