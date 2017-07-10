@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.20
+---
+- `FEATURE` support webp
+
 ### 1.0.16
 ---
 - `feat`: support 'enableReactHotLoader'
