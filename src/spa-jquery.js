@@ -140,7 +140,7 @@ module.exports = (env = 'development', options) => {
     StyleLoaderConfig,
     ImageLoaderConfig,
     ExtractCssPlugin,
-  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}`, PROJECT_CONFIG.base64);
+  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, PROJECT_CONFIG.publicPath, PROJECT_CONFIG.base64);
 
   if (ExtractCssPlugin) {
     pluginsConfig.push(ExtractCssPlugin);
@@ -256,7 +256,7 @@ module.exports = (env = 'development', options) => {
             },
           ],
         },
-        getOtherFileLoaderConfig(),
+        getOtherFileLoaderConfig(PROJECT_CONFIG.publicPath),
       ]
     },
 

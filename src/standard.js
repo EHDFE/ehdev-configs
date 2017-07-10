@@ -8,7 +8,7 @@ const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 // const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
-const { getHTML, getStyleWithImageLoaderConfig } = require('./util');
+const { getHTML, getStyleWithImageLoaderConfig, getOtherFileLoaderConfig } = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
@@ -148,7 +148,7 @@ module.exports = (env = 'development', options) => {
     StyleLoaderConfig,
     ImageLoaderConfig,
     ExtractCssPlugin,
-  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, `${PROJECT_CONFIG.publicPath}`, PROJECT_CONFIG.base64);
+  } = getStyleWithImageLoaderConfig(IS_DEV, BROWSER_SUPPORTS, PROJECT_CONFIG.publicPath, PROJECT_CONFIG.base64);
 
   if (ExtractCssPlugin) {
     FinalPlugins.push(ExtractCssPlugin);
@@ -250,6 +250,9 @@ module.exports = (env = 'development', options) => {
               options: {
                 svgo: {
                   floatPrecision: 2,
+                  plugins: [{
+                    cleanupIDs: false,
+                  }],
                 },
               },
             },
@@ -257,6 +260,7 @@ module.exports = (env = 'development', options) => {
         },
         StyleLoaderConfig,
         ImageLoaderConfig,
+        getOtherFileLoaderConfig(PROJECT_CONFIG.publicPath),
         {
           test: /\.html$/,
           use: [

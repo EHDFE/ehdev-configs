@@ -8,15 +8,15 @@ exports.getHTML = (cwd) => glob.sync('*.html', {
 /**
  * 其它文件处理
  */
-exports.getOtherFileLoaderConfig = () => {
+exports.getOtherFileLoaderConfig = (PUBLIC_PATH) => {
   return {
-    test: /\.(swf|xlsx?|txt|docx?|pptx?|ico|cur)$/,
+    test: /\.(swf|xlsx?|txt|docx?|pptx?|ico|cur|webp)$/,
     use: {
       loader: 'file-loader',
       options: {
         name: '[name].[ext]',
         outputPath: 'assets/',
-        publicPath: '/assets/',
+        publicPath: PUBLIC_PATH,
       },
     },
   }
@@ -103,8 +103,8 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
             interlaced: true,
           },
           pngquant: {
-            quality: '65-80',
-            speed: 5
+            quality: '70-90',
+            speed: 4,
           }
         }
       },
