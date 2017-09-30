@@ -6,7 +6,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 
-const { getHTML, getStyleWithImageLoaderConfig, getOtherFileLoaderConfig } = require('./util');
+const {
+  getHTML,
+  getStyleWithImageLoaderConfig,
+  getOtherFileLoaderConfig,
+  HtmlLoaderConfig,
+  getSVGLoaderConfig,
+  getJsLoader,
+} = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
@@ -80,16 +87,16 @@ module.exports = (env = 'development', options) => {
       path.join(SOURCE_PATH, `app/${pageName}.js`),
     ];
     if (IS_DEV) {
-      if (PROJECT_CONFIG.enableReactHotLoader) {
+      if (PROJECT_CONFIG.enableReactHotLoader && PROJECT_CONFIG.framework === 'react') {
         entryConfig[pageName].unshift(
           'react-hot-loader/patch',
-          `webpack-dev-server/client?http://localhost:${options.port}`,
-          'webpack/hot/dev-server'
+          path.join(MODULES_PATH, 'webpack-dev-server/client') + `?http://localhost:${options.port}`,
+          path.join(MODULES_PATH, 'webpack/hot/dev-server')
         );
       } else {
         entryConfig[pageName].unshift(
-          `webpack-dev-server/client?http://localhost:${options.port}`,
-          'webpack/hot/dev-server'
+          path.join(MODULES_PATH, 'webpack-dev-server/client') + `?http://localhost:${options.port}`,
+          path.join(MODULES_PATH, 'webpack/hot/dev-server')
         );
       }
     }
@@ -104,7 +111,7 @@ module.exports = (env = 'development', options) => {
           'assets/commonLibs',
           pageName,
         ],
-        minify: {
+        minify: IS_DEV ? false : {
           removeComments: true,
           collapseWhitespace: true,
           removeRedundantAttributes: true,
@@ -187,87 +194,22 @@ module.exports = (env = 'development', options) => {
 
     module: {
       rules: [
-        {
-          test: /\.jsx?$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                presets: [
-                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
-                    targets: {
-                      browsers: BROWSER_SUPPORTS
-                    },
-                    module: false,
-                  }],
-                  path.resolve(MODULES_PATH, 'babel-preset-react'),
-                  path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
-                ],
-                plugins: PROJECT_CONFIG.enableReactHotLoader ? [
-                  'react-hot-loader/babel',
-                  path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
-                ] : [
-                  path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import')
-                ],
-              },
-            },           
-          ],
-        },
-        {
-          test: /\.svg$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                presets: [
-                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
-                    targets: {
-                      browsers: BROWSER_SUPPORTS
-                    },
-                    module: false,
-                  }],
-                  path.resolve(MODULES_PATH, 'babel-preset-react'),
-                ],
-              },
-            },
-            {
-              loader: 'react-svg-loader',
-              options: {
-                svgo: {
-                  floatPrecision: 2,
-                },
-              },
-            },
-          ],
-        },
+        getJsLoader(PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS),
         StyleLoaderConfig,
         ImageLoaderConfig,
-        {
-          test: /\.html$/,
-          use: [
-            {
-              loader: 'html-loader',
-              options: {
-                interpolate: true,
-                root: './',
-              },
-            },
-          ],
-        },
-        getOtherFileLoaderConfig(PROJECT_CONFIG.publicPath),
-      ]
+        HtmlLoaderConfig,
+        getOtherFileLoaderConfig(PROJECT_CONFIG),
+      ].concat(getSVGLoaderConfig(PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS))
     },
 
     externals: ExternalsConfig,
 
-    resolve: {
-      modules: [
-        'node_modules',
-        MODULES_PATH,
-      ]
-    },
+    // resolve: {
+    //   modules: [
+    //     'node_modules',
+    //     MODULES_PATH,
+    //   ]
+    // },
 
     target: 'web',
 

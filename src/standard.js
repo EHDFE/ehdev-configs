@@ -8,7 +8,14 @@ const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 // const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
-const { getHTML, getStyleWithImageLoaderConfig, getOtherFileLoaderConfig } = require('./util');
+const {
+  getHTML,
+  getStyleWithImageLoaderConfig,
+  getOtherFileLoaderConfig,
+  HtmlLoaderConfig,
+  getSVGLoaderConfig,
+  getJsLoader,
+} = require('./util');
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
@@ -49,7 +56,8 @@ module.exports = (env = 'development', options) => {
   } else {
     FinalPlugins.push(
       new webpack.HashedModuleIdsPlugin(),
-      new WebpackChunkHash()
+      new WebpackChunkHash(),
+      new webpack.optimize.ModuleConcatenationPlugin()
     );
   }
 
@@ -67,16 +75,16 @@ module.exports = (env = 'development', options) => {
       });
       let entry = matchs.slice(0, 1);
       if (IS_DEV) {
-        if (PROJECT_CONFIG.enableReactHotLoader) {
+        if (PROJECT_CONFIG.enableReactHotLoader && PROJECT_CONFIG.framework === 'react') {
           entry.unshift(
             'react-hot-loader/patch',
-            `webpack-dev-server/client?http://localhost:${options.port}`,
-            'webpack/hot/dev-server'
+            path.join(MODULES_PATH, 'webpack-dev-server/client') + `?http://localhost:${options.port}`,
+            path.join(MODULES_PATH, 'webpack/hot/dev-server')
           );
         } else {
           entry.unshift(
-            `webpack-dev-server/client?http://localhost:${options.port}`,
-            'webpack/hot/dev-server'
+            path.join(MODULES_PATH, 'webpack-dev-server/client') + `?http://localhost:${options.port}`,
+            path.join(MODULES_PATH, 'webpack/hot/dev-server')
           );
         }
       }
@@ -112,7 +120,7 @@ module.exports = (env = 'development', options) => {
         inject: PROJECT_CONFIG.htmlAssetsInject,
         chunksSortMode: 'auto',
         chunks: [].concat(LibiaryList.map(name => `assets/${name}`), 'assets/commonLibs', `${pageModule.module}/bundle.${page}`),
-        minify: {
+        minify: IS_DEV ? false : {
           removeComments: true,
           collapseWhitespace: true,
           removeRedundantAttributes: true,
@@ -179,7 +187,6 @@ module.exports = (env = 'development', options) => {
   });
 
   FinalPlugins = FinalPlugins.concat(
-    new webpack.optimize.ModuleConcatenationPlugin(),
     htmlPlugins,
     IncludeAssetsConfig,
     LibiaryChunks,
@@ -204,94 +211,32 @@ module.exports = (env = 'development', options) => {
 
     module: {
       rules: [
-        {
-          test: /\.jsx?$/,
-          exclude: /node_modules/,
-          loader: 'babel-loader',
-          query: {
-            presets: [
-              [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
-                targets: {
-                  browsers: BROWSER_SUPPORTS
-                }, 
-                module: false,
-              }],
-              path.resolve(MODULES_PATH, 'babel-preset-react'),
-              path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
-            ],
-            plugins: PROJECT_CONFIG.enableReactHotLoader ? [
-              'react-hot-loader/babel',
-              path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import'),
-            ] : [
-              path.resolve(MODULES_PATH, 'babel-plugin-syntax-dynamic-import')
-            ],
-          }
-        },
-        {
-          test: /\.svg$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                presets: [
-                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
-                    targets: {
-                      browsers: BROWSER_SUPPORTS
-                    },
-                    module: false,
-                  }],
-                  path.resolve(MODULES_PATH, 'babel-preset-react'),
-                ],
-              },
-            },
-            {
-              loader: 'react-svg-loader',
-              options: {
-                svgo: {
-                  floatPrecision: 2,
-                  plugins: [{
-                    cleanupIDs: false,
-                  }],
-                },
-              },
-            },
-          ],
-        },
+        getJsLoader(PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS),
         StyleLoaderConfig,
         ImageLoaderConfig,
-        getOtherFileLoaderConfig(PROJECT_CONFIG.publicPath),
-        {
-          test: /\.html$/,
-          use: [
-            {
-              loader: 'html-loader',
-              options: {
-                interpolate: true,
-                root: './',
-              },
-            },
-          ],
-        }
-      ]
+        getOtherFileLoaderConfig(PROJECT_CONFIG),
+        HtmlLoaderConfig,
+      ].concat(getSVGLoaderConfig(PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS))
     },
 
     externals: ExternalsConfig,
 
-    resolve: {
+    // resolve: {
+      // modules: [
+      //   'node_modules',
+      //   MODULES_PATH,
+      // ]
+    // },
+    
+    resolveLoader: {
       modules: [
-        'node_modules',
-        MODULES_PATH,
-      ]
+        MODULES_PATH
+      ],
     },
 
     target: 'web',
 
     devtool: IS_DEV ? 'cheap-module-source-map': 'source-map',
-
-    resolveLoader: {
-      modules: [ MODULES_PATH ],
-    },
 
     plugins: FinalPlugins,
   };

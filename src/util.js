@@ -1,3 +1,4 @@
+const path = require('path');
 const glob = require('glob');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -8,19 +9,17 @@ exports.getHTML = (cwd) => glob.sync('*.html', {
 /**
  * 其它文件处理
  */
-exports.getOtherFileLoaderConfig = (PUBLIC_PATH) => {
-  return {
-    test: /\.(swf|xlsx?|txt|docx?|pptx?|ico|cur|webp)$/,
-    use: {
-      loader: 'file-loader',
-      options: {
-        name: '[name].[ext]',
-        outputPath: 'assets/',
-        publicPath: PUBLIC_PATH,
-      },
+exports.getOtherFileLoaderConfig = (PROJECT_CONFIG) => ({
+  test: /\.(swf|xlsx?|txt|docx?|pptx?|ico|cur|webp|woff|eot|ttf)$/,
+  use: {
+    loader: 'file-loader',
+    options: {
+      name: '[name].[ext]',
+      outputPath: 'assets/',
+      publicPath: PROJECT_CONFIG.publicPath,
     },
-  }
-};
+  },
+});
 
 /**
  * 样式和图片配置
@@ -92,22 +91,6 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
         loader: base64Config.enable ? 'url-loader' : 'file-loader',
         options: c,
       },
-      {
-        loader: 'image-webpack-loader',
-        query: {
-          progressive: true,
-          optipng: {
-            optimizationLevel: 3,
-          },
-          gifsicle: {
-            interlaced: true,
-          },
-          pngquant: {
-            quality: '70-90',
-            speed: 4,
-          }
-        }
-      },
     ];
   }
   return {
@@ -122,3 +105,130 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
     ExtractCssPlugin,
   }
 }
+
+exports.HtmlLoaderConfig = {
+  test: /\.html$/,
+  use: [
+    {
+      loader: 'html-loader',
+      options: {
+        interpolate: true,
+        root: './',
+      },
+    },
+  ],
+};
+
+/**
+ * svg 处理
+ */
+exports.getSVGLoaderConfig = (PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS) => {
+  if (PROJECT_CONFIG.framework === 'react') {
+    return {
+      test: /\.svg$/,
+      exclude: /node_modules/,
+      oneOf: [
+        {
+          resourceQuery: /assets/, // foo.svg?assets,
+          use: {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/',
+              publicPath: PROJECT_CONFIG.publicPath,
+            },
+          },
+        },
+        {
+          // resourceQuery: /^(?!.*assets)/, // foo.svg
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: [
+                  [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
+                    targets: {
+                      browsers: BROWSER_SUPPORTS
+                    },
+                    module: false,
+                    useBuiltIns: PROJECT_CONFIG.useBuiltIns,
+                  }],
+                  path.resolve(MODULES_PATH, 'babel-preset-react'),
+                ],
+                cacheDirectory: true,
+              },
+            },
+            {
+              loader: 'react-svg-loader',
+              options: {
+                svgo: {
+                  floatPrecision: 2,
+                  plugins: [{
+                    cleanupIDs: false,
+                  }],
+                },
+              },
+            },
+          ],
+        }
+      ],
+    };
+  } else {
+    return {
+      test: /\.svg$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          outputPath: 'assets/',
+          publicPath: PROJECT_CONFIG.publicPath,
+        },
+      },
+    }
+  }
+};
+
+/**
+ * js 处理
+ */
+exports.getJsLoader = (PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS) => {
+  const ret = {
+    test: /\.jsx?$/,
+    exclude: /node_modules/,
+    loader: 'babel-loader',
+  };
+  if (PROJECT_CONFIG.framework === 'react') {
+    Object.assign(ret, {
+      options: {
+        presets: [
+          [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
+            targets: {
+              browsers: BROWSER_SUPPORTS
+            }, 
+            module: false,
+            useBuiltIns: PROJECT_CONFIG.useBuiltIns,
+          }],
+          path.resolve(MODULES_PATH, 'babel-preset-react'),
+          path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
+        ],
+      }
+    });
+  } else {
+    Object.assign(ret, {
+      options: {
+        presets: [
+          [ path.resolve(MODULES_PATH, 'babel-preset-env'), {
+            targets: {
+              browsers: BROWSER_SUPPORTS
+            }, 
+            module: false,
+            useBuiltIns: PROJECT_CONFIG.useBuiltIns,
+          }],
+          path.resolve(MODULES_PATH, 'babel-preset-stage-1'),
+        ],
+      }
+    });
+  }
+  return ret;
+};
