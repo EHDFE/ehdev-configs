@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.23
+---
+- `FEATURE` support `useFolderAsHtmlName`
+
 ### 1.0.22
 ---
 - `FEATURE` add `svgToReactComponent`

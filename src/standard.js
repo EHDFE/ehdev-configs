@@ -115,7 +115,8 @@ module.exports = (env = 'development', options) => {
   htmlsList.forEach(pageModule => {
     htmlPlugins = htmlPlugins.concat(
       pageModule.htmls.map(page => new HtmlWebpackPlugin({
-        filename: `${pageModule.module}/${page}.html`,
+        // filename: `${pageModule.module}/${page}.html`,
+        filename: PROJECT_CONFIG.useFolderAsHtmlName ? `${pageModule.module}.html` : `${pageModule.module}/${page}.html`,
         template: path.resolve(PAGE_PATH, `./${pageModule.module}/${page}.html`),
         inject: PROJECT_CONFIG.htmlAssetsInject,
         chunksSortMode: 'auto',
