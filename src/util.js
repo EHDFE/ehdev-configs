@@ -123,7 +123,7 @@ exports.HtmlLoaderConfig = {
  * svg 处理
  */
 exports.getSVGLoaderConfig = (PROJECT_CONFIG, MODULES_PATH, BROWSER_SUPPORTS) => {
-  if (PROJECT_CONFIG.framework === 'react') {
+  if (PROJECT_CONFIG.svgToReactComponent) {
     return {
       test: /\.svg$/,
       exclude: /node_modules/,

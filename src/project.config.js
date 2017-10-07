@@ -15,4 +15,5 @@ module.exports = {
   htmlAssetsInject: true,
   framework: 'react',
   useBuiltIns: false,
+  svgToReactComponent: false,
 };

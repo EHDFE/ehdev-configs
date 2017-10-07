@@ -1,6 +1,10 @@
 # HISOTORY
 ---
 
+### 1.0.22
+---
+- `FEATURE` add `svgToReactComponent`
+
 ### 1.0.20
 ---
 - `FEATURE` support webp
