@@ -5,6 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const WebpackChunkHash = require('webpack-chunk-hash');
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
+const SwRegisterWebpackPlugin = require('sw-register-webpack-plugin');
 
 const {
   getHTML,
@@ -14,6 +16,7 @@ const {
   getSVGLoaderConfig,
   getJsLoader,
 } = require('./util');
+
 
 const WORK_DIR = process.cwd();
 const SOURCE_PATH = path.resolve(WORK_DIR, './src');
@@ -153,6 +156,7 @@ module.exports = (env = 'development', options) => {
     pluginsConfig.push(ExtractCssPlugin);
   }
 
+
   // 外部资源配置，这里配置后不通过构建
   const ExternalsConfig = {};
   const ExternalsCopyList = [];
@@ -186,6 +190,37 @@ module.exports = (env = 'development', options) => {
       'process.env.DEBUG': JSON.stringify(process.env.DEBUG)
     }),
   ];
+
+  // sw-precache-webpack-plugin configurations
+  const SERVICE_CONFIG = Object.assign({}, 
+    require('./project.config').serviceWorkConf, 
+    require(path.resolve(WORK_DIR, './abc.json')).serviceWorkConf
+  );
+  const {
+    enable: SERVICE_WORKER_ENABLE,
+    staticFileGlobsIgnorePatterns: ignoreArry,
+    prefix: SERVICE_WORKER_PREFIX,
+    ...SW_PRECACHE_CONFIG
+  } = SERVICE_CONFIG;
+
+  if (SERVICE_WORKER_ENABLE) {
+    let ignorePatternsArry = [];
+
+    ignoreArry.map(item => {
+      ignorePatternsArry.push(new RegExp(item));
+    });
+    pluginsConfig = [
+      ... pluginsConfig,
+      new SWPrecacheWebpackPlugin({
+        ...SW_PRECACHE_CONFIG,
+        staticFileGlobsIgnorePatterns: ignorePatternsArry,
+      }),
+      new SwRegisterWebpackPlugin({
+        filePath: './sw-register.js',
+        prefix: SERVICE_WORKER_PREFIX
+      })
+    ];
+  }
 
   return {
     entry: Object.assign(entryConfig, LibiaryEntry),

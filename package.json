@@ -42,6 +42,8 @@
     "postcss-loader": "^2.0.5",
     "react-svg-loader": "^1.1.1",
     "style-loader": "^0.18.1",
+    "sw-precache-webpack-plugin": "^0.11.4",
+    "sw-register-webpack-plugin": "^1.0.14",
     "url-loader": "^0.5.8",
     "webpack": "^3.6.0",
     "webpack-chunk-hash": "^0.4.0",
