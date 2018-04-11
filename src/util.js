@@ -74,6 +74,7 @@ exports.getStyleWithImageLoaderConfig = (IS_DEV, BROWSER_SUPPORTS, PUBLIC_PATH, 
     });
     ExtractCssPlugin = new ExtractTextPlugin({
       filename: '[name].[contenthash:8].css',
+      allChunks: true,
     });
     // 生产环境 图片需要优化
     const c = {
